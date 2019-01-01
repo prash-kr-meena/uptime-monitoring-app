@@ -138,8 +138,9 @@ const server = http.createServer((req, res) => {
       });
 
       // THe Big Question , So not every request has a payload/body eg. GET then woud the 'end' event would be called???
-      //  YES, the 'end' as well as the 'data' both the event will be called doesn't matter if there is a payload or not.
-      // in that case the buffere will be initialized with the empty string and nothing is going to get appended to it.
+      //  YES, the 'end'  will be called doesn't matter if there is a payload or not.
+      // if there is no payload the 'data' event will not be called
+      // in that case the buffer will be initialized with the empty string and nothing is going to get appended to it.
       // and its still going to be ended and we will still be able to send the response
 
 
