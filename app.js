@@ -14,7 +14,7 @@ const url = require('url');
 const server = http.createServer((req, res) => {
       console.log(req.url, " <<<<--- url string");
 
-      // get the url the user requested for and parse it
+      // 1. get the url the user requested for and parse it
       let parsedUrl = url.parse(req.url, true); // --> true option is use to specify url module to call the querystring module to
       console.log(parsedUrl); //                       in order to get the parsed Url object,
 
@@ -45,7 +45,7 @@ const server = http.createServer((req, res) => {
 
       */
 
-      // get the path
+      // 2. get the path
       let path = parsedUrl.pathname;
       console.log(path, " <<<<<-- untrimmed path");
 
@@ -53,17 +53,24 @@ const server = http.createServer((req, res) => {
       console.log(trimmedPath, " <<<-- untrimmed");
 
 
-      // get the query string as an object
+      // 2. get the query string as an object
       let querystring = parsedUrl.query;
 
-      // send the response
-      res.end("Server Responded\n");
-
-      // identify the request method --> NOTE: curl can do get request only, for other use postman
+      // 3. identify the request method --> NOTE: curl can do get request only, for other use postman
       let method = req.method.toUpperCase();
 
-      // log the request
-      console.log("\n\nurl requested  on : ", trimmedPath, " with method ", method, "\nand with these query String parameters:", querystring);
+      // 4. get the headers as an object
+      let headers = req.headers;
+
+      // 5.  send the response
+      res.end("Server Responded\n");
+
+
+      // finally : log the request
+      console.log("\n\nurl requested  on : ", trimmedPath,
+            " with method ", method,
+            "\nand with these query String parameters:", querystring,
+            "\n request reciever with these headers :\n ", JSON.stringify(headers, null, 4));
 
       // Test :  curl localhost:3000/webpath?foo=bar&abc=xyz&abc=123
 });
