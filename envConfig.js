@@ -1,70 +1,37 @@
 "use strict";
-
-// Process
-// The process object is a global that provides information about, and control over,
-// the current Node.js process.As a global, it is always available to Node.js applications
-// without using require().
-
-console.log("\n\n process Object",process,"\n\n");
-
-console.log("\n\n process.env Object",process.env, "\n\n");
-
-// print process.argv
-console.log("\n\nCommand Line arguments : ");
-process.argv.forEach(function (val, index) {
-      console.log(index + ': ' + val);
-});
-
-
-// Standard Method (no library)
-// The arguments are stored in process.argv
-
-// >>>> from node docs on handling command line args:
-// process.argv is an array containing the command line arguments.
-// The first element will be 'node', the second element will be the name of the JavaScript file.
-// The next elements will be any additional command line arguments.
-
-
-
-// ------------------------------------------------------------------------------------------------
-// so reather then starting the app with  'node app.js'  we want to start it with 'NODE_ENV=<Env-Name> node app.js'
-// this NODE_ENV command-line variable becomes available to us as global to use
-// --> instead of NODE_ENV we could say node-environment, or just environment ie we could take any name we want  but
-// BUT using NODE_ENV is just a conventions that many applications use.
-
-
-
-
-// ------------------------------------------------------------------------------------------------
-
 /**
 * Create and export environment configuration variables
 */
+
+
+// Rather then having one port we need to listen now on two ports, as http and https conflict with each other
+// So, one port will be for http and another for https
+
+
 
 // container for all the environments
 const environments = {};
 
 
 // staging (default) environment
-environments.staging = {
-      'port': 3000,
+environments.staging = {      // in GENERAL most apps have    http on port 80       and https on port 443
+      'httpPort': 3000, //       which is the convention followed from long ago.
+      'httpsPort': 3001,//          and thats what most browser expect, on production you should chose them.
       'envName' : 'staging'
 };
 
 // production environment
 environments.production = {
-      'port': 5000,
+      'httpPort': 5000,
+      'httpsPort': 5001,
       'envName' : 'production'
 };
 
 // Determine which environment was passed as the command-line argument
 
-
 // NODE_ENV=production node app.js                               node app.js  --> then NODE_ENV is undefined
 let currentEnvironment = process.env.NODE_ENV;
-console.log(typeof currentEnvironment);
 currentEnvironment = typeof (process.env.NODE_ENV) === 'string' ?  currentEnvironment.toLowerCase() : '' ;
-// console.log(currentEnvironment, "<<-------");
 
 
 // if the sepcified environment does not exist then use the defualt 'staging' environment

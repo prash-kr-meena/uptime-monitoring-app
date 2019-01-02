@@ -6,17 +6,60 @@
 
 // Dependencies
 const http = require('http');
+const https = require('https');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const envConfig = require('./envConfig');
+const fs = require('fs');
+
+// -------------------------------------  HTTP server  ------------------------------------
+
+// instantiate HTTP server
+const httpServer = http.createServer((req, res) => {
+      unifiedServer(req, res);
+});
+
+
+// Start the HTTP server
+httpServer.listen(envConfig.httpPort, () => {
+      console.log(`\n\nHTTP Server @ ${envConfig.httpPort}\t\t\tEnvironment : ${envConfig.envName}\n---------------------------------------------------------------------------------\n`);
+});
 
 
 
-// The server should respond to all requests with a string
-const server = http.createServer((req, res) => {
+// -------------------------------------  HTTPs server  ------------------------------------
+
+// the key and cert are basically the content of the file that we generated using the OpenSSL
+// as we need there content before instantiating the server so we would need to do it synchronously
+let httpsServerOptions = {
+      'key' : fs.readFileSync('./https/key.pem') ,
+      'cert' :fs.readFileSync('./https/cert.pem')
+};
+
+// instantiate HTTPs server
+const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
+      console.log("creating the HTTPs server  <<<<<<<<<<<<<");
+      unifiedServer(req, res);
+});
+
+
+// Start the HTTPs server
+httpsServer.listen(envConfig.httpsPort, () => {
+      console.log(`HTTPs Server @ ${envConfig.httpsPort}\t\t\tEnvironment : ${envConfig.envName}
+      \n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n`);
+});
+
+
+// -------------------------------  Unified server login  -------------------------------
+
+// Both the http as well as the https server can use the logic of this function,
+// rather then doing the same twice.
+// ---> SO in reality the both are working the same way its just that they both are on different ports
+
+let unifiedServer = function (req, res) {
       // 1. get the url the user requested for and parse it
       let parsedUrl = url.parse(req.url, true); // --> true option is use to specify url module to call the querystring module to
-      console.log(parsedUrl); //                       in order to get the parsed Url object,
+      // console.log(parsedUrl); //                       in order to get the parsed Url object,
 
 
       // 2. get the path
@@ -46,19 +89,6 @@ const server = http.createServer((req, res) => {
       // reeq also emits another event 'end' which tell when its done streaming
       req.on('end', () => {
             buffer += decoder.end();
-
-            /* at this point we have got everything that the user might have sent us
-            we know the path that they requested for
-            we know the queryString that they might have sent us,
-            we know which http method by which they are sending the request
-            we know the hearders that thet are sending.
-            we know the payload that they are sending, if any
-            so we have all the data we need to process the user requeset
-            --> for now we just want to pacakge it in an object and send/route it to an request handler
-
-            SO we need to define some request handlers, and set-up a routing structure ie a router
-            so that this http server can look at the request and route it to the handler it needs to go to
-            */
 
             // construct the data object need to be sent to the user
             let data = {
@@ -94,22 +124,20 @@ const server = http.createServer((req, res) => {
                   res.end(payloadString);
 
                   // note we can perform task even after the res.end() or res.send()
-                  console.log("\nReturning this response : ", payloadString);
+                  console.log("Returning this response : ", payloadString, '\n\n');
             });
       });
-});
+};
 
 
-
-
-// -------------------------------------------------------------------------------------
+// ------------------------------------ Server Request Handler ---------------------------------
 
 // difining the request handlers
 const handler = {};
 
 // about handler
 handler.aboutHandler = function (data, callback) {
-      console.log("aboutHandler <<-- handled the request");
+      console.log("aboutHandler <<----- handled the request");
       callback(202, { name: "about handler" });
 };
 /* so each of these handlers is going to be getting a big-block of data, which we collected above from the user.
@@ -120,30 +148,28 @@ and tell us 2 things.
 */
 // not-found handler
 handler.notFoundHandler = function (data, callback) {
-      console.log("notFoundHandler <<-- handled the request");
+      console.log("notFoundHandler <<----- handled the request");
       callback(400);
 };
 
 
-// -------------------------------------------------------------------------------------
+
+// so we need to add a route 'ping' for the request '/ping' ---> it will simply call the callback with 200
+// purpose of this route is just so,
+// --> you can moinitor your application and easily find out if it is alive or not
+// and hence it is also very usefull for uptime monitoring: SO if this application was being monitored by another uptime monitor, the '/ping' route is probably the one we give , as the '/ping' route does not have any  effect on the server all it does is, callback 200 and say i am still alive.
+
+handler.pingHandler = function (data, callback) {
+      console.log("pingHandler <<----- handled the request");
+      callback(200);
+};
+
+// --------------------------------- Router for routing requests -----------------------------
 
 // difining  a request router
 const router = {
-      'about': handler.aboutHandler
+      'about': handler.aboutHandler,
+      'ping' : handler.pingHandler,
 };
-
-
-
-
-
-// -------------------------------------------------------------------------------------
-
-// Start the server, and have it listen on port 3000
-server.listen(envConfig.port, () => {
-      console.log(`\n\nServer Started @ ${envConfig.port}\t\tEnvironment : ${envConfig.envName}\n--------------------------------------------------------------------------------------------------\n`);
-});
-// this will keep the node.js event-loop busy by telling, it always have something new to do,
-// which is continue to listen on port 3000, so inorder to stop we would need to proactively kill the server
-
 
 // -------------------------------------------------------------------------------------
