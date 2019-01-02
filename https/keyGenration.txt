@@ -1,0 +1,10 @@
+
+openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
+
+
+for the https support we need, we need to create a SSL certificate, that we can use withing the app to
+facilitate the SSL HandShake and so forth
+
+--> to create then SSL certificate we can install the OpenSSL tool  with the command below :
+    openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem
+
