@@ -76,7 +76,7 @@
         "await": true,
         "use strict": true,
         "function": true,
-        "module": true
+        "module": true,
+        "process" : true
     }
-
 }

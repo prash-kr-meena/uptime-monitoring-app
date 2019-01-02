@@ -7,8 +7,8 @@
 // Dependencies
 const http = require('http');
 const url = require('url');
-// const { StringDecoder } = require('string_decoder');
 const StringDecoder = require('string_decoder').StringDecoder;
+const envConfig = require('./envConfig');
 
 
 
@@ -100,6 +100,8 @@ const server = http.createServer((req, res) => {
 });
 
 
+
+
 // -------------------------------------------------------------------------------------
 
 // difining the request handlers
@@ -122,6 +124,7 @@ handler.notFoundHandler = function (data, callback) {
       callback(400);
 };
 
+
 // -------------------------------------------------------------------------------------
 
 // difining  a request router
@@ -130,11 +133,14 @@ const router = {
 };
 
 
+
+
+
 // -------------------------------------------------------------------------------------
 
 // Start the server, and have it listen on port 3000
-server.listen(3000, () => {
-      console.log("Server Started");
+server.listen(envConfig.port, () => {
+      console.log(`\n\nServer Started @ ${envConfig.port}\t\tEnvironment : ${envConfig.envName}\n--------------------------------------------------------------------------------------------------\n`);
 });
 // this will keep the node.js event-loop busy by telling, it always have something new to do,
 // which is continue to listen on port 3000, so inorder to stop we would need to proactively kill the server
