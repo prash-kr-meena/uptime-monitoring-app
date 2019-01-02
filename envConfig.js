@@ -27,10 +27,10 @@ process.argv.forEach(function (val, index) {
 
 
 // ------------------------------------------------------------------------------------------------
-      // so reather then starting the app with  'node app.js'  we want to start it with 'NODE_ENV=<Env-Name> node app.js'
-      // this NODE_ENV command-line variable becomes available to us as global to use
-      // --> instead of NODE_ENV we could say node-environment, or just environment ie we could take any name we want  but
-      // BUT using NODE_ENV is just a conventions that many applications use.
+// so reather then starting the app with  'node app.js'  we want to start it with 'NODE_ENV=<Env-Name> node app.js'
+// this NODE_ENV command-line variable becomes available to us as global to use
+// --> instead of NODE_ENV we could say node-environment, or just environment ie we could take any name we want  but
+// BUT using NODE_ENV is just a conventions that many applications use.
 
 
 
@@ -63,12 +63,12 @@ environments.production = {
 // NODE_ENV=production node app.js                               node app.js  --> then NODE_ENV is undefined
 let currentEnvironment = process.env.NODE_ENV;
 console.log(typeof currentEnvironment);
-currentEnvironment = typeof (process.env.NODE_ENV === 'undefined') ?  '' : currentEnvironment.toLowerCase();
+currentEnvironment = typeof (process.env.NODE_ENV) === 'string' ?  currentEnvironment.toLowerCase() : '' ;
 // console.log(currentEnvironment, "<<-------");
 
 
 // if the sepcified environment does not exist then use the defualt 'staging' environment
-let environmentToExport = typeof (environments[currentEnvironment] === 'undefined') ?  environments.staging : environments[currentEnvironment] ;
+let environmentToExport = typeof (environments[currentEnvironment]) === 'object' ?  environments[currentEnvironment]  : environments.staging;
 
 
 // Rather then exporting all the environments, will just export only the one that the application requires to run on.

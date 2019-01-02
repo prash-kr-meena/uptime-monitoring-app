@@ -78,8 +78,8 @@ const server = http.createServer((req, res) => {
             chosenHandler(data, function (statusCode = 200, payload ={}) {
                   /* setting up default values in case the handler doesn't return one.
                   it is similar to :
-                  statusCode = typeof (statusCode === 'number') ? statusCode : 200;
-                  payload = typeof (payload === 'object') ? payload : {};
+                  statusCode = typeof (statusCode) === 'number' ? statusCode : 200;
+                  payload = typeof (payload) === 'object' ? payload : {};
                   */
                   // now we can't send an object to the user, so we convert this object into string and send it
                   let payloadString = JSON.stringify(payload, 4, null);
