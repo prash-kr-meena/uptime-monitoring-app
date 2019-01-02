@@ -69,14 +69,18 @@
     "wsh": false,
     "yui": false,
     "globals": {
-        "node": true,
         "browser": true,
         "require": true,
         "async": true,
         "await": true,
+
+
+
+        "node": true,
         "use strict": true,
         "function": true,
         "module": true,
-        "process" : true
+        "process" : true,
+        "__dirname" : true
     }
 }

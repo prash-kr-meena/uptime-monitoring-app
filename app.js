@@ -9,8 +9,21 @@ const http = require('http');
 const https = require('https');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
-const envConfig = require('./envConfig');
 const fs = require('fs');
+
+const envConfig = require('./envConfig');
+const _data = require('./lib/data');
+
+// ------------------------------------- TEST  ------------------------------------
+// Todo : Delete this from app.js
+
+let testData = {'name' : "prashant", 'roll-no' : 314, 'age' : 22};
+_data.create('test', 'user', testData, function(err){
+      if(err){
+            console.log(err);
+      }
+});
+
 
 // -------------------------------------  HTTP server  ------------------------------------
 
@@ -52,14 +65,11 @@ httpsServer.listen(envConfig.httpsPort, () => {
 
 // -------------------------------  Unified server login  -------------------------------
 
-// Both the http as well as the https server can use the logic of this function,
-// rather then doing the same twice.
-// ---> SO in reality the both are working the same way its just that they both are on different ports
+// Both the http as well as the https server can use the logic of this function
 
 let unifiedServer = function (req, res) {
       // 1. get the url the user requested for and parse it
       let parsedUrl = url.parse(req.url, true); // --> true option is use to specify url module to call the querystring module to
-      // console.log(parsedUrl); //                       in order to get the parsed Url object,
 
 
       // 2. get the path
@@ -102,21 +112,11 @@ let unifiedServer = function (req, res) {
             // choose the handler this request should go to
             let chosenHandler = typeof (router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handler.notFoundHandler;
 
-            // typeof is an operator that always returns a string, describing the type of a value. ---> IMPORTANT
-
             // rout the request to the chosen handler
             chosenHandler(data, function (statusCode = 200, payload ={}) {
-                  /* setting up default values in case the handler doesn't return one.
-                  it is similar to :
-                  statusCode = typeof (statusCode) === 'number' ? statusCode : 200;
-                  payload = typeof (payload) === 'object' ? payload : {};
-                  */
-                  // now we can't send an object to the user, so we convert this object into string and send it
                   let payloadString = JSON.stringify(payload, 4, null);
 
                   // formalize the fact that we are sending the JSON object back to the user
-                  // ie we want to tell the user, that its going to get JSON,
-                  // so browser or anybody like postman will understand that we are sending JSON and parse it that way.
                   res.setHeader('Content-Type','application/json');
 
                   // send the response
@@ -135,29 +135,13 @@ let unifiedServer = function (req, res) {
 // difining the request handlers
 const handler = {};
 
-// about handler
-handler.aboutHandler = function (data, callback) {
-      console.log("aboutHandler <<----- handled the request");
-      callback(202, { name: "about handler" });
-};
-/* so each of these handlers is going to be getting a big-block of data, which we collected above from the user.
-We are also goint to send it a callback, and we want the handler to call the call-back when done handling the request.
-and tell us 2 things.
-1. we want to callback a http status collected
-2. and a payload, and that should be an object. (we are choosing it to be object, because we are making this handler to work exclusively with json, ie JSON api's. But if we want we could return anything, number, string etc.)
-*/
+
 // not-found handler
 handler.notFoundHandler = function (data, callback) {
       console.log("notFoundHandler <<----- handled the request");
       callback(400);
 };
 
-
-
-// so we need to add a route 'ping' for the request '/ping' ---> it will simply call the callback with 200
-// purpose of this route is just so,
-// --> you can moinitor your application and easily find out if it is alive or not
-// and hence it is also very usefull for uptime monitoring: SO if this application was being monitored by another uptime monitor, the '/ping' route is probably the one we give , as the '/ping' route does not have any  effect on the server all it does is, callback 200 and say i am still alive.
 
 handler.pingHandler = function (data, callback) {
       console.log("pingHandler <<----- handled the request");
@@ -168,8 +152,17 @@ handler.pingHandler = function (data, callback) {
 
 // difining  a request router
 const router = {
-      'about': handler.aboutHandler,
       'ping' : handler.pingHandler,
 };
 
 // -------------------------------------------------------------------------------------
+
+
+
+
+/**
+* we are going to write data into the files,
+* we are going to use file system as the key-value of different json file
+*
+* but we need a library in order to do that --> we need to create this library byourselves
+*/
