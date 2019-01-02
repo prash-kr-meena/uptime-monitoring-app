@@ -84,6 +84,11 @@ const server = http.createServer((req, res) => {
                   // now we can't send an object to the user, so we convert this object into string and send it
                   let payloadString = JSON.stringify(payload, 4, null);
 
+                  // formalize the fact that we are sending the JSON object back to the user
+                  // ie we want to tell the user, that its going to get JSON,
+                  // so browser or anybody like postman will understand that we are sending JSON and parse it that way.
+                  res.setHeader('Content-Type','application/json');
+
                   // send the response
                   res.writeHead(statusCode);
                   res.end(payloadString);
@@ -136,29 +141,3 @@ server.listen(3000, () => {
 
 
 // -------------------------------------------------------------------------------------
-
-
-
-
-
-// 🌈  ~ >> brew install node@10
-// Updating Homebrew...
-// ==> Downloading https://homebrew.bintray.com/bottles/node@10-10.15.0.mojave.bott
-// ######################################################################## 100.0%
-// ==> Pouring node@10-10.15.0.mojave.bottle.tar.gz
-// ==> Caveats
-// node@10 is keg-only, which means it was not symlinked into /usr/local,
-// because this is an alternate version of another formula.
-
-// If you need to have node@10 first in your PATH run:
-//   echo 'export PATH="/usr/local/opt/node@10/bin:$PATH"' >> ~/.bash_profile
-
-// For compilers to find node@10 you may need to set:
-//   export LDFLAGS="-L/usr/local/opt/node@10/lib"
-//   export CPPFLAGS="-I/usr/local/opt/node@10/include"
-
-// ==> Summary
-// 🍺  /usr/local/Cellar/node@10/10.15.0: 3,630 files, 45.6MB
-// 🌈  ~ >> brew update
-// Already up-to-date.
-// 🌈  ~ >> clear
