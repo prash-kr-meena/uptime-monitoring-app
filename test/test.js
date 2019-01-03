@@ -7,8 +7,8 @@
 
 
 // dependencies
-const _data = require('../../lib/data');
-const helpers =require('../../lib/helpers');
+const _data = require('./../lib/data');
+const helpers =require('./../lib/helpers');
 
 
 
