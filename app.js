@@ -17,12 +17,24 @@ const _data = require('./lib/data');
 // ------------------------------------- TEST  ------------------------------------
 // Todo : Delete this from app.js
 
-let testData = {'name' : "prashant", 'roll-no' : 314, 'age' : 22};
+let testData = {'name' : "prashant", 'rollNo' : 314, 'age' : 22};
+
 _data.create('test', 'user', testData, function(err){
       if(err){
             console.log(err);
       }
 });
+
+_data.read('test', 'user',function (err, data) {
+      if(err){
+            console.log(err);
+      }else{
+            // console.log(typeof data); --> 'string'
+            data = JSON.parse(data);
+            console.log(data);
+      }
+});
+
 
 
 // -------------------------------------  HTTP server  ------------------------------------
