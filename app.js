@@ -35,6 +35,11 @@ _data.read('test', 'user',function (err, data) {
       }
 });
 
+_data.update('test', 'user', {foo:'bar'}, function(err){
+      if(err){
+            console.log(err);
+      }
+});
 
 
 // -------------------------------------  HTTP server  ------------------------------------
