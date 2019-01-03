@@ -25,6 +25,7 @@ _data.create('test', 'user', testData, function(err){
       }
 });
 
+
 _data.read('test', 'user',function (err, data) {
       if(err){
             console.log(err);
@@ -35,7 +36,15 @@ _data.read('test', 'user',function (err, data) {
       }
 });
 
+
 _data.update('test', 'user', {foo:'bar'}, function(err){
+      if(err){
+            console.log(err);
+      }
+});
+
+
+_data.delete('test', 'user', function(err){
       if(err){
             console.log(err);
       }
