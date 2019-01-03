@@ -4,58 +4,20 @@
 * primary file for the API
 */
 
-// Dependencies
+//! Dependencies
 const http = require('http');
 const https = require('https');
 const url = require('url');
 const StringDecoder = require('string_decoder').StringDecoder;
 const fs = require('fs');
 
+// ! custom modules
 const envConfig = require('./envConfig');
-const _data = require('./lib/data');
-
-// ------------------------------------- TEST  ------------------------------------
-// Todo : Delete this from app.js
-
-let testData = {'name' : "prashant", 'rollNo' : 314, 'age' : 22};
+const handlers = require('./lib/handlers');
+const helpers = require('./lib/helpers');
 
 
-
-console.log('1.  creating the file and writing data');
-_data.create('test', 'user', testData, function(err){
-      if(err){
-            console.log(err);
-      }else{
-
-            console.log('2. reading the data from file');
-            _data.read('test', 'user',function (err, data) {
-                  if(err){
-                        console.log(err);
-                  }else{
-                        // console.log(typeof data); --> 'string'
-                        data = JSON.parse(data);
-                        console.log(data);
-
-                        console.log('3. updaing the file and writing data to it');
-                        _data.update('test', 'user', {foo:'bar'}, function(err){
-                              if(err){
-                                    console.log(err);
-                              }else{
-                                    console.log('4. deleting the file -- unlinking');
-                                    _data.delete('test', 'user', function(err){
-                                          if(err){
-                                                console.log(err);
-                                          }
-                                    });
-                              }
-                        });
-                  }
-            });
-      }
-});
-
-
-// -------------------------------------  HTTP server  ------------------------------------
+// ?-------------------------------------  HTTP server  ------------------------------------
 
 // instantiate HTTP server
 const httpServer = http.createServer((req, res) => {
@@ -70,7 +32,7 @@ httpServer.listen(envConfig.httpPort, () => {
 
 
 
-// -------------------------------------  HTTPs server  ------------------------------------
+//? -------------------------------------  HTTPs server  ------------------------------------
 
 // the key and cert are basically the content of the file that we generated using the OpenSSL
 // as we need there content before instantiating the server so we would need to do it synchronously
@@ -93,14 +55,13 @@ httpsServer.listen(envConfig.httpsPort, () => {
 });
 
 
-// -------------------------------  Unified server login  -------------------------------
+//? -------------------------------  Unified server login  -------------------------------
 
 // Both the http as well as the https server can use the logic of this function
 
 let unifiedServer = function (req, res) {
       // 1. get the url the user requested for and parse it
       let parsedUrl = url.parse(req.url, true); // --> true option is use to specify url module to call the querystring module to
-
 
       // 2. get the path
       let path = parsedUrl.pathname;
@@ -114,7 +75,6 @@ let unifiedServer = function (req, res) {
 
       // 4. get the headers as an object
       let headers = req.headers;
-
 
       // 5. get the payload, if any --> we need string_decoder module for that
       let decoder = new StringDecoder('utf-8'); // need to tell what kind of char-set/encoding it can expect
@@ -136,11 +96,11 @@ let unifiedServer = function (req, res) {
                   'querystringObject': querystringObject,
                   'method': method,
                   'headers': headers,
-                  'payload': buffer
+                  'payload': helpers.parseJsonToObject(buffer)
             };
 
             // choose the handler this request should go to
-            let chosenHandler = typeof (router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handler.notFoundHandler;
+            let chosenHandler = typeof (router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFoundHandler;
 
             // rout the request to the chosen handler
             chosenHandler(data, function (statusCode = 200, payload ={}) {
@@ -160,39 +120,12 @@ let unifiedServer = function (req, res) {
 };
 
 
-// ------------------------------------ Server Request Handler ---------------------------------
-
-// difining the request handlers
-const handler = {};
 
 
-// not-found handler
-handler.notFoundHandler = function (data, callback) {
-      console.log("notFoundHandler <<----- handled the request");
-      callback(400);
-};
-
-
-handler.pingHandler = function (data, callback) {
-      console.log("pingHandler <<----- handled the request");
-      callback(200);
-};
-
-// --------------------------------- Router for routing requests -----------------------------
+//? --------------------------------- Router for routing requests -----------------------------
 
 // difining  a request router
 const router = {
-      'ping' : handler.pingHandler,
+      'ping' : handlers.pingHandler,
+      'users' : handlers.users,
 };
-
-// -------------------------------------------------------------------------------------
-
-
-
-
-/**
-* we are going to write data into the files,
-* we are going to use file system as the key-value of different json file
-*
-* but we need a library in order to do that --> we need to create this library byourselves
-*/
