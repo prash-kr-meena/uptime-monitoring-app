@@ -7,6 +7,7 @@
 // config container
 const config  = {
       'hashingSecret' : 'this is a secrete',
+      'randomStringLen' : 20,
 };
 
 
