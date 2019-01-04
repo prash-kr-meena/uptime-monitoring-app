@@ -17,6 +17,8 @@ const handlers = require('./lib/handlers');
 const helpers = require('./lib/helpers');
 
 
+
+
 // ?-------------------------------------  HTTP server  ------------------------------------
 
 // instantiate HTTP server
@@ -29,6 +31,7 @@ const httpServer = http.createServer((req, res) => {
 httpServer.listen(envConfig.httpPort, () => {
       console.log(`\n\nHTTP Server @ ${envConfig.httpPort}\t\t\tEnvironment : ${envConfig.envName}\n---------------------------------------------------------------------------------\n`);
 });
+
 
 
 
@@ -53,6 +56,8 @@ httpsServer.listen(envConfig.httpsPort, () => {
       console.log(`HTTPs Server @ ${envConfig.httpsPort}\t\t\tEnvironment : ${envConfig.envName}
       \n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n`);
 });
+
+
 
 
 //? -------------------------------  Unified server login  -------------------------------
@@ -122,10 +127,13 @@ let unifiedServer = function (req, res) {
 
 
 
+
+
 //? --------------------------------- Router for routing requests -----------------------------
 
 // difining  a request router
 const router = {
       'ping' : handlers.pingHandler,
       'users' : handlers.users,
+      'tokens': handlers.tokens,
 };
