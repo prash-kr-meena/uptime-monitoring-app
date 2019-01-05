@@ -12,7 +12,7 @@ const StringDecoder = require('string_decoder').StringDecoder;
 const fs = require('fs');
 
 // ! custom modules
-const envConfig = require('./envConfig');
+const envConfig = require('./config/envConfig');
 const handlers = require('./lib/handlers');
 const helpers = require('./lib/helpers');
 
@@ -73,7 +73,7 @@ let unifiedServer = function (req, res) {
       let trimmedPath = path.replace(/^\/+|\/+$/g, '');
 
       // 2. get the query string as an object
-      let querystringObject = parsedUrl.query;
+      let queryStringObject = parsedUrl.query;
 
       // 3. identify the request method --> NOTE: curl can do get request only, for other use postman
       let method = req.method.toUpperCase();
@@ -98,7 +98,7 @@ let unifiedServer = function (req, res) {
             // construct the data object need to be sent to the user
             let data = {
                   'trimmedPath': trimmedPath,
-                  'querystringObject': querystringObject,
+                  'queryStringObject': queryStringObject,
                   'method': method,
                   'headers': headers,
                   'payload': helpers.parseJsonToObject(buffer)
@@ -136,4 +136,5 @@ const router = {
       'ping' : handlers.pingHandler,
       'users' : handlers.users,
       'tokens': handlers.tokens,
+      'checks' : handlers.checks
 };
