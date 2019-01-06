@@ -27,6 +27,16 @@ const httpServer = http.createServer((req, res) => {
 });
 
 
+// TODO : get rid of this !
+handlers.sendTwilioSms("7011380979",'hello from xxx',(err)=>{
+      if(!err){
+            console.log("success");
+      }else{
+            console.log("fuck this"+ err);
+      }
+});
+
+
 // Start the HTTP server
 httpServer.listen(envConfig.httpPort, () => {
       console.log(`\n\nHTTP Server @ ${envConfig.httpPort}\t\t\tEnvironment : ${envConfig.envName}\n---------------------------------------------------------------------------------\n`);
