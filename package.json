@@ -4,8 +4,9 @@
     "description": "",
     "main": "app.js",
     "scripts": {
-        "start": "NODE_ENV=staging nodemon app.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "start": "NODE_DEBUG=workers, NODE_ENV=staging nodemon app.js",
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "other options i have": "NODE_DEBUG=workers,server, helpers NODE_ENV=staging nodemon app.js"
     },
     "repository": {
         "type": "git",
