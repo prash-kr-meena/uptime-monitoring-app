@@ -1,150 +1,45 @@
 'use strict';
 
 /**
+* Now we have much of the API in place, we have a way to create user, to sign in , to create checks, SMS alerts... and all other operations
+* So, now need to perform the  checks that the usre created. --> and for that we need background workers. ie background processes
+*
+* SO now the nature of our application is fundamentaly changing. We are going from a server that simply startsup and listen on some port
+* to an application that starts up the server and the  background workers and need to be able to do both tasks at the same time.
+*
+* The current structure where our app.js, starts up the server and contains all the server logic. __> this will not work anymode.
+* So we need to refactor, and  so the app.js will simply call a server file (containing all the server logic) to starts up the server.
+* And it will also call the worker file which will simply start up all the background workers.
+*
+*/
+
+/**
 * primary file for the API
 */
 
 //! Dependencies
-const http = require('http');
-const https = require('https');
-const url = require('url');
-const StringDecoder = require('string_decoder').StringDecoder;
-const fs = require('fs');
-
-// ! custom modules
-const envConfig = require('./config/envConfig');
-const handlers = require('./lib/handlers');
-const helpers = require('./lib/helpers');
+const server = require('./lib/server');
+// const workers = require('./lib/workers');
 
 
+// Declare the app
+const app  = {};
 
 
-// ?-------------------------------------  HTTP server  ------------------------------------
+// init function
+app.init = function () {
+      // starts the server
+      server.init();
 
-// instantiate HTTP server
-const httpServer = http.createServer((req, res) => {
-      unifiedServer(req, res);
-});
-
-
-// TODO : get rid of this !
-handlers.sendTwilioSms("7011380979",'hello from xxx',(err)=>{
-      if(!err){
-            console.log("success");
-      }else{
-            console.log("fuck this"+ err);
-      }
-});
-
-
-// Start the HTTP server
-httpServer.listen(envConfig.httpPort, () => {
-      console.log(`\n\nHTTP Server @ ${envConfig.httpPort}\t\t\tEnvironment : ${envConfig.envName}\n---------------------------------------------------------------------------------\n`);
-});
-
-
-
-
-//? -------------------------------------  HTTPs server  ------------------------------------
-
-// the key and cert are basically the content of the file that we generated using the OpenSSL
-// as we need there content before instantiating the server so we would need to do it synchronously
-let httpsServerOptions = {
-      'key' : fs.readFileSync('./https/key.pem') ,
-      'cert' :fs.readFileSync('./https/cert.pem')
-};
-
-// instantiate HTTPs server
-const httpsServer = https.createServer(httpsServerOptions, (req, res) => {
-      console.log("creating the HTTPs server  <<<<<<<<<<<<<");
-      unifiedServer(req, res);
-});
-
-
-// Start the HTTPs server
-httpsServer.listen(envConfig.httpsPort, () => {
-      console.log(`HTTPs Server @ ${envConfig.httpsPort}\t\t\tEnvironment : ${envConfig.envName}
-      \n||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||\n`);
-});
-
-
-
-
-//? -------------------------------  Unified server login  -------------------------------
-
-// Both the http as well as the https server can use the logic of this function
-
-let unifiedServer = function (req, res) {
-      // 1. get the url the user requested for and parse it
-      let parsedUrl = url.parse(req.url, true); // --> true option is use to specify url module to call the querystring module to
-
-      // 2. get the path
-      let path = parsedUrl.pathname;
-      let trimmedPath = path.replace(/^\/+|\/+$/g, '');
-
-      // 2. get the query string as an object
-      let queryStringObject = parsedUrl.query;
-
-      // 3. identify the request method --> NOTE: curl can do get request only, for other use postman
-      let method = req.method.toUpperCase();
-
-      // 4. get the headers as an object
-      let headers = req.headers;
-
-      // 5. get the payload, if any --> we need string_decoder module for that
-      let decoder = new StringDecoder('utf-8'); // need to tell what kind of char-set/encoding it can expect
-      //                                       so it can decode it using that char-set, Generally for all JSON api it will be utf-8
-      let buffer = ''; // empty string
-
-      req.on('data', function (data) {
-            let decodedData = decoder.write(data);
-            buffer += decodedData;
-      });
-
-      // reeq also emits another event 'end' which tell when its done streaming
-      req.on('end', () => {
-            buffer += decoder.end();
-
-            // construct the data object need to be sent to the user
-            let data = {
-                  'trimmedPath': trimmedPath,
-                  'queryStringObject': queryStringObject,
-                  'method': method,
-                  'headers': headers,
-                  'payload': helpers.parseJsonToObject(buffer)
-            };
-
-            // choose the handler this request should go to
-            let chosenHandler = typeof (router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFoundHandler;
-
-            // rout the request to the chosen handler
-            chosenHandler(data, function (statusCode = 200, payload ={}) {
-                  let payloadString = JSON.stringify(payload, 4, null);
-
-                  // formalize the fact that we are sending the JSON object back to the user
-                  res.setHeader('Content-Type','application/json');
-
-                  // send the response
-                  res.writeHead(statusCode);
-                  res.end(payloadString);
-
-                  // note we can perform task even after the res.end() or res.send()
-                  console.log("Returning this response : ", payloadString, '\n\n');
-            });
-      });
+      // start the worker
+      // workers.init();
 };
 
 
+//  execute the init function
+app.init();
+
+// Export the app, can be used for testing
+module.exports = app;
 
 
-
-
-//? --------------------------------- Router for routing requests -----------------------------
-
-// difining  a request router
-const router = {
-      'ping' : handlers.pingHandler,
-      'users' : handlers.users,
-      'tokens': handlers.tokens,
-      'checks' : handlers.checks
-};
